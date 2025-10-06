@@ -24,6 +24,9 @@ DHAN_CLIENT_ID = os.getenv("DHAN_CLIENT_ID")
 DHAN_ACCESS_TOKEN = os.getenv("DHAN_ACCESS_TOKEN")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
+# Railway-specific: Keep process alive
+PORT = os.getenv("PORT", "8080")
+
 # OpenAI Client
 openai_client = OpenAI(api_key=OPENAI_API_KEY)
 
@@ -612,73 +615,4 @@ Analyze the data and provide a trading signal in this EXACT JSON format:
                 
                 for batch_num, batch in enumerate(batches, 1):
                     logger.info(f"\n📦 Batch {batch_num}/{len(batches)}: {batch}")
-                    await self.analyze_and_send_signals(batch)
-                    
-                    if batch_num < len(batches):
-                        logger.info(f"⏳ Waiting 10 seconds before next batch...")
-                        await asyncio.sleep(10)
-                
-                logger.info("\n✅ All batches completed!")
-                logger.info("⏰ Next cycle in 5 minutes...\n")
-                
-                # Wait 5 minutes
-                await asyncio.sleep(300)
-                
-            except KeyboardInterrupt:
-                logger.info("Bot stopped by user")
-                self.running = False
-                break
-            except Exception as e:
-                logger.error(f"Error in main loop: {e}")
-                await asyncio.sleep(60)
-    
-    async def send_startup_message(self):
-        """Startup message"""
-        try:
-            msg = "🤖 *AI Option Trading Bot Started!*\n\n"
-            msg += "🧠 Powered by GPT-4o-mini\n"
-            msg += f"📊 Tracking {len(self.security_id_map)} stocks/indices\n"
-            msg += "⏱️ Analysis cycle: 5 minutes\n"
-            msg += "📈 Strategy: Price Action + Option Chain\n\n"
-            msg += "*Signal Criteria:*\n"
-            msg += "✅ Confidence ≥ 60%\n"
-            msg += "✅ Risk:Reward ≥ 1:2\n"
-            msg += "✅ ATR-based stops\n\n"
-            msg += "⚠️ *Disclaimer:* Signals are for educational purposes only. Trade at your own risk.\n\n"
-            msg += "_Market Hours: 9:15 AM - 3:30 PM (Mon-Fri)_"
-            
-            await self.bot.send_message(
-                chat_id=TELEGRAM_CHAT_ID,
-                text=msg,
-                parse_mode='Markdown'
-            )
-            logger.info("✅ Startup message sent")
-        except Exception as e:
-            logger.error(f"Error sending startup message: {e}")
-
-
-# ========================
-# RUN BOT
-# ========================
-if __name__ == "__main__":
-    try:
-        # Environment check
-        required_vars = [
-            TELEGRAM_BOT_TOKEN,
-            TELEGRAM_CHAT_ID,
-            DHAN_CLIENT_ID,
-            DHAN_ACCESS_TOKEN,
-            OPENAI_API_KEY
-        ]
-        
-        if not all(required_vars):
-            logger.error("❌ Missing environment variables!")
-            logger.error("Required: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, DHAN_CLIENT_ID, DHAN_ACCESS_TOKEN, OPENAI_API_KEY")
-            exit(1)
-        
-        bot = AIOptionTradingBot()
-        asyncio.run(bot.run())
-        
-    except Exception as e:
-        logger.error(f"Fatal error: {e}")
-        exit(1)
+                    await self.analyze_and_send_
